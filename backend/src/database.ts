@@ -2,7 +2,9 @@ import initSqlJs, { Database as SqlJsDatabase, SqlJsStatic } from 'sql.js';
 import fs from 'fs';
 import path from 'path';
 
-const DB_PATH = path.join(__dirname, '..', 'data', 'clientes.db');
+const DB_PATH = process.env.VERCEL
+  ? path.join('/tmp', 'clientes.db')
+  : path.join(__dirname, '..', 'data', 'clientes.db');
 
 let SQL: SqlJsStatic;
 let db: SqlJsDatabase;
