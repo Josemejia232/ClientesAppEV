@@ -64,8 +64,8 @@ class Statement {
         const result = db.exec('SELECT last_insert_rowid() as id, changes() as changes');
         const row = result[0]?.values[0];
         return {
-            lastInsertRowid: row ? row[0] : 0,
-            changes: row ? row[1] : 0,
+            lastInsertRowid: row ? Number(row[0]) : 0,
+            changes: row ? Number(row[1]) : 0,
         };
     }
 }
