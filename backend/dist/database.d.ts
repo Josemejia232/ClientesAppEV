@@ -1,20 +1,7 @@
-declare class Statement {
-    private sql;
-    constructor(sql: string);
-    get(...params: any[]): any;
-    all(...params: any[]): any[];
-    run(...params: any[]): {
-        lastInsertRowid: number;
-        changes: number;
-    };
-}
-export declare function persistDb(): void;
-export interface DbWrapper {
-    prepare(sql: string): Statement;
-    exec(sql: string): any;
-}
-export declare function initDb(): Promise<void>;
-export declare function getDb(): DbWrapper;
-export declare function closeDb(): void;
-export {};
+import type { DbWrapper } from './sqlite-db';
+export type { DbWrapper };
+export declare const initDb: () => Promise<void>;
+export declare const getDb: () => DbWrapper;
+export declare const persistDb: () => void;
+export declare const closeDb: () => void;
 //# sourceMappingURL=database.d.ts.map
