@@ -1,4 +1,4 @@
-import initSqlJs, { Database as SqlJsDatabase, SqlJsStatic } from 'sql.js';
+import type { Database as SqlJsDatabase, SqlJsStatic } from 'sql.js';
 import fs from 'fs';
 import path from 'path';
 
@@ -8,6 +8,13 @@ const DB_PATH = process.env.VERCEL
 
 let SQL: SqlJsStatic;
 let db: SqlJsDatabase;
+
+async function getSqlJs() {
+  const initSqlJs = (await import('sql.js')).default;
+  return initSqlJs({
+    locateFile: (file: string) => `https://cdn.jsdelivr.net/npm/sql.js@1.14.1/dist/${file}`,
+  });
+}
 
 class Statement {
   private sql: string;
@@ -148,9 +155,7 @@ export interface DbWrapper {
 }
 
 export async function initDb(): Promise<void> {
-  SQL = await initSqlJs({
-    locateFile: (file: string) => `https://cdn.jsdelivr.net/npm/sql.js@1.14.1/dist/${file}`,
-  });
+  SQL = await getSqlJs();
 
   const dir = path.dirname(DB_PATH);
   if (!fs.existsSync(dir)) {
