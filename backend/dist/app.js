@@ -28,10 +28,10 @@ app.use((req, res, next) => {
     };
     next();
 });
-app.use('/api/clients', clients_1.default);
-app.use('/api/notes', notes_1.default);
-app.use('/api/programaciones', programaciones_1.default);
-app.get('/api/health', (_req, res) => {
+app.use('/clients', clients_1.default);
+app.use('/notes', notes_1.default);
+app.use('/programaciones', programaciones_1.default);
+app.get('/health', (_req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 //# sourceMappingURL=app.js.map

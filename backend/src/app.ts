@@ -21,11 +21,11 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use('/api/clients', clientsRouter);
-app.use('/api/notes', notesRouter);
-app.use('/api/programaciones', programacionesRouter);
+app.use('/clients', clientsRouter);
+app.use('/notes', notesRouter);
+app.use('/programaciones', programacionesRouter);
 
-app.get('/api/health', (_req, res) => {
+app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
