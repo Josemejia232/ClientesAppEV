@@ -184,12 +184,14 @@ function parseOrderBy(sql: string): { field: string; dir: string }[] {
   });
 }
 
-function parseLimitOffset(sql: string): { limit: number; offset: number } | null {
+function parseLimitOffset(sql: string): { limit: number; offset: number; limitIsParam: boolean; offsetIsParam: boolean } | null {
   const limitMatch = sql.match(/LIMIT\s+(\d+|\?)(?:\s+OFFSET\s+(\d+|\?))?/i);
   if (!limitMatch) return null;
   return {
     limit: limitMatch[1] === '?' ? 0 : parseInt(limitMatch[1]),
-    offset: limitMatch[2] && limitMatch[2] !== '?' ? parseInt(limitMatch[2]) : 0,
+    offset: limitMatch[2] && limitMatch[2] !== '?' ? parseInt(limitMatch[2]) : (limitMatch[2] === '?' ? 0 : 0),
+    limitIsParam: limitMatch[1] === '?',
+    offsetIsParam: limitMatch[2] === '?',
   };
 }
 
@@ -205,7 +207,7 @@ export function getDb() {
   const prepare = (sql: string) => ({
     get: (...allParams: any[]): any => {
       const params = [...allParams];
-      sql = sql.replace(/\s+/g, ' ');
+      sql = sql.replace(/\s+/g, ' ').trim();
       const op = sql.match(/^(\w+)/i)?.[1]?.toUpperCase();
       if (op === 'SELECT') {
         const { table, join } = parseFrom(sql);
@@ -256,6 +258,7 @@ export function getDb() {
           tables[tableName].push(row);
           return { lastInsertRowid: row.id, changes: 1 };
         }
+        return { lastInsertRowid: 0, changes: 0 };
       }
       if (op === 'UPDATE') {
         const tableName = sql.match(/UPDATE\s+(\w+)/i)?.[1] || '';
@@ -304,7 +307,7 @@ export function getDb() {
     },
     all: (...allParams: any[]): any[] => {
       const params = [...allParams];
-      sql = sql.replace(/\s+/g, ' ');
+      sql = sql.replace(/\s+/g, ' ').trim();
       sql = sql.replace(/`/g, '');
       const op = sql.match(/^(\w+)/i)?.[1]?.toUpperCase();
       if (op === 'SELECT') {
@@ -370,8 +373,9 @@ export function getDb() {
 
         const lo = parseLimitOffset(sql);
         if (lo) {
-          const limit = lo.limit;
-          const offset = lo.offset;
+          const whereQCount = (whereCondition.match(/\?/g) || []).length;
+          const limit = lo.limitIsParam ? Number(params[whereQCount]) : lo.limit;
+          const offset = lo.offsetIsParam ? Number(params[whereQCount + 1] || 0) : lo.offset;
           filtered = filtered.slice(offset, offset + limit);
         }
 
@@ -382,7 +386,7 @@ export function getDb() {
     },
     run: (...allParams: any[]): { lastInsertRowid: number; changes: number } => {
       const params = [...allParams];
-      const s = sql.replace(/\s+/g, ' ');
+      const s = sql.replace(/\s+/g, ' ').trim();
       const op = s.match(/^(\w+)/i)?.[1]?.toUpperCase();
       if (op === 'INSERT') return prepare(s).get(...params);
       if (op === 'UPDATE') {

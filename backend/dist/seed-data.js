@@ -530,20 +530,24 @@ const programaciones = [
     { client_id: 11, titulo: 'Revisión convenio corporativo', descripcion: 'Revisar convenio de tarifas corporativas', tipo: 'Reunión', fecha: '2026-06-22', hora: '11:00', duracion: 45, estado: 'Pendiente', prioridad: 'Media', created_by: 'Laura Torres' },
 ];
 async function runSeed() {
-    const count = (0, database_1.getDb)().prepare('SELECT COUNT(*) as count FROM clients').get().count;
-    if (count > 0)
+    const db = (0, database_1.getDb)();
+    const count = db.prepare('SELECT COUNT(*) as count FROM clients').get().count;
+    if (count && count > 0)
         return;
-    const insertCliente = (0, database_1.getDb)().prepare(`
-    INSERT INTO clients (
-      identificacion, tipo_identificacion, nombre, nombre_comercial, nombre_contacto,
-      direccion, ciudad, departamento, telefono1, telefono2, email,
-      contacto_facturacion, email_facturacion, anio_apertura, tipo_persona,
-      estado, vendedor, categoria, cupo_credito, observaciones,
-      fecha_registro, ultimo_contacto, proximo_contacto
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `);
+    const insertCliente = db.prepare(`INSERT INTO clients (
+    identificacion, tipo_identificacion, nombre, nombre_comercial, nombre_contacto,
+    direccion, ciudad, departamento, telefono1, telefono2, email,
+    contacto_facturacion, email_facturacion, anio_apertura, tipo_persona,
+    estado, vendedor, categoria, cupo_credito, observaciones,
+    fecha_registro, ultimo_contacto, proximo_contacto
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
     for (const c of exports.clientes) {
-        insertCliente.run(c.identificacion, c.tipo_identificacion, c.nombre, c.nombre_comercial, c.nombre_contacto, c.direccion, c.ciudad, c.departamento, c.telefono1, c.telefono2, c.email, c.contacto_facturacion, c.email_facturacion, c.anio_apertura, c.tipo_persona, c.estado, c.vendedor, c.categoria, c.cupo_credito, c.observaciones, c.fecha_registro, c.ultimo_contacto, c.proximo_contacto);
+        try {
+            insertCliente.run(c.identificacion, c.tipo_identificacion, c.nombre, c.nombre_comercial, c.nombre_contacto, c.direccion, c.ciudad, c.departamento, c.telefono1, c.telefono2, c.email, c.contacto_facturacion, c.email_facturacion, c.anio_apertura, c.tipo_persona, c.estado, c.vendedor, c.categoria, c.cupo_credito, c.observaciones, c.fecha_registro, c.ultimo_contacto, c.proximo_contacto);
+        }
+        catch (e) {
+            console.log('[seed] insert error:', e.message);
+        }
     }
     const insertNota = (0, database_1.getDb)().prepare(`
     INSERT INTO notas (client_id, contenido, tipo, fecha, created_by)
