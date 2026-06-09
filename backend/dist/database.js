@@ -141,7 +141,9 @@ function initSchema() {
     db.run('CREATE INDEX IF NOT EXISTS idx_programaciones_client ON programaciones(client_id)');
 }
 async function initDb() {
-    SQL = await (0, sql_js_1.default)();
+    SQL = await (0, sql_js_1.default)({
+        locateFile: (file) => `https://cdn.jsdelivr.net/npm/sql.js@1.14.1/dist/${file}`,
+    });
     const dir = path_1.default.dirname(DB_PATH);
     if (!fs_1.default.existsSync(dir)) {
         fs_1.default.mkdirSync(dir, { recursive: true });

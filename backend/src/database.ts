@@ -148,7 +148,9 @@ export interface DbWrapper {
 }
 
 export async function initDb(): Promise<void> {
-  SQL = await initSqlJs();
+  SQL = await initSqlJs({
+    locateFile: (file: string) => `https://cdn.jsdelivr.net/npm/sql.js@1.14.1/dist/${file}`,
+  });
 
   const dir = path.dirname(DB_PATH);
   if (!fs.existsSync(dir)) {
